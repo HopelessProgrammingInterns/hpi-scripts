@@ -1,0 +1,43 @@
+#!/bin/bash
+
+function exiterr {
+	echo "-- $1. Exiting :("
+	exit 1
+}
+function addprinter {
+	cmd="lpadmin -p $1 -U 'hpi\\$user' -v smb://printsrv2013/$2 -P $ppddir/$ppdname"
+	eval $cmd || sudo sh -c "eval $cmd" || exiterr "Fehlgeschlagen Drucker $1 hinzuzufügen"
+}
+
+cd ~
+
+ppdname="Canon-imageRunner-C3100.ppd"
+ppddir=".local/share/ppd"
+
+echo "Drucker Treiber wird gedownloadet ..."
+
+if [ ! -f $ppddir/$ppdname ]; then
+	mkdir -p $ppddir
+	wget "http://tombeckmann.de/c/$ppdname" -O $ppddir/$ppdname
+fi
+
+echo "Konfiguration des Druckers ..."
+
+read -p "HPI Benutzernamen eingeben: " user
+#read -p "HPI Passwort eingeben: " -s password
+#password=${password//@/%40}
+#password=${password//:/\\:}
+#password=${password//\(/\\\(}
+#password=${password//\|/\\\|}
+#password=${password//\$/\\\$}
+
+echo "Drucker wird dem System hinzugefügt ..."
+addprinter HPIPrinterColor color
+addprinter HPIPrinterBlack BlackAndWhite
+
+echo "Installation scheint erfolgreich gewesen zu sein"
+
+which "gnome-control-center" &> /dev/null || exit 0
+
+gnome-control-center printers &
+
