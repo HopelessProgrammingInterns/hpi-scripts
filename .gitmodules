@@ -1,0 +1,3 @@
+[submodule "hpi-mount"]
+	path = hpi-mount
+	url = https://github.com/timediv/hpi-mount.git
