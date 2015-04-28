@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+
+HOST="fb10moodle.hpi.uni-potsdam.de"
+
+function remove_host_entry {
+	sudo sed -i "/$HOST/d" /etc/hosts
+	echo "Eintrag entfernt. fb10moodle ist wieder über das interne Netz erreichbar."
+	exit 0
+}
+
+function add_host_entry {
+	echo "Hostfile Eintrag muss geändert werden um Zugriff zu erlauben."
+	echo
+	echo "Mit -r laufen lassen, um Änderungen zu entfernen. Nach Änderung kann fb10moodle nicht mehr vom HPI-Netz geöffnet werden, bis Änderung rückgängig gemacht wurde."
+	read -p "Ändern? [y/n] " -n 1 -r
+	echo
+
+	if [[ $REPLY =~ ^[Yy]$  ]]; then
+		echo "127.0.0.1 $HOST" | sudo tee -a /etc/hosts
+	else
+		echo "Invalid answer."
+		exit 1
+	fi
+}
+
+while getopts "r" option
+do
+	case $option in
+		r  ) remove_host_entry ;;
+		*  ) echo "Invalid argument" ;;
+	esac
+done
+
+grep $HOST /etc/hosts > /dev/null || add_host_entry
+
+read -p "Enter your HPI user name: " user
+echo "To forward the HTTPS port, root permissions are required."
+ssh -oStrictHostKeyChecking=no -oIdentitiesOnly=yes -f -N $user@ssh-stud.hpi.uni-potsdam.de -L443:$HOST:443
+
+xdg-open "https://$HOST"
+
