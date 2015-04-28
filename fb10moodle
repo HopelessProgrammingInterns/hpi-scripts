@@ -37,7 +37,7 @@ grep $HOST /etc/hosts > /dev/null || add_host_entry
 
 read -p "Enter your HPI user name: " user
 echo "To forward the HTTPS port, root permissions are required."
-ssh -oStrictHostKeyChecking=no -oIdentitiesOnly=yes -f -N $user@ssh-stud.hpi.uni-potsdam.de -L443:$HOST:443
+sudo ssh -oStrictHostKeyChecking=no -oIdentitiesOnly=yes -f -N $user@ssh-stud.hpi.uni-potsdam.de -L443:$HOST:443
 
 xdg-open "https://$HOST"
 
